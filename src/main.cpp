@@ -69,7 +69,7 @@ float y;
 float theta;
 
 char base_link[] = "/base_link";
-char odom[] = "/odom";
+char odom[] = "/wheel_odom";
 
 void updateEncoder_R_1()
 {
@@ -235,11 +235,11 @@ void loop()
     }
 
     // check count per loop
-    Serial.print("R count: ");
-    Serial.print(ENCO_R_count);
+    // Serial.print("R count: ");
+    // Serial.print(ENCO_R_count);
     
-    Serial.print("  L count: ");
-    Serial.println(ENCO_L_count);
+    // Serial.print("  L count: ");
+    // Serial.println(ENCO_L_count);
 
     // convert encoder to rpm
     rpm_R_measured = ENCO_R_count * 6000.0 / (ENCO_CPR * GEAR_RATIO);
@@ -247,9 +247,6 @@ void loop()
 
     // convert encoder to distance travelled
     distance_R_per_loop = (ENCO_R_count / (ENCO_CPR * GEAR_RATIO)) * (2.0 * PI * wheel_radius);
-    // Serial.print("distance_R_per_loop: ");
-    // Serial.print(distance_R_per_loop);
-    // Serial.print('\t');
     distance_L_per_loop = (ENCO_L_count / (ENCO_CPR * GEAR_RATIO)) * (2.0 * PI * wheel_radius);
 
     // compute distance travalled as a robot
@@ -266,23 +263,23 @@ void loop()
       theta += TWO_PI;
 
     // compute x and y
-    y += distance_average * sin(theta);
     x += distance_average * cos(theta);;
+    y += distance_average * sin(theta);
 
     // pub tf
-    geometry_msgs::TransformStamped t;
+    geometry_msgs::TransformStamped tf_msg;
 
-    t.header.frame_id = odom;
-    t.child_frame_id = base_link;
+    tf_msg.header.frame_id = odom;
+    tf_msg.child_frame_id = base_link;
 
-    t.transform.translation.x = x;
-    t.transform.translation.y = y;
-    t.transform.translation.z = 0.0;
+    tf_msg.transform.translation.x = x;
+    tf_msg.transform.translation.y = y;
+    tf_msg.transform.translation.z = 0.0;
 
-    t.transform.rotation = tf::createQuaternionFromYaw(theta);
-    t.header.stamp = nh.now();
+    tf_msg.transform.rotation = tf::createQuaternionFromYaw(theta);
+    tf_msg.header.stamp = nh.now();
 
-    broadcaster.sendTransform(t);
+    broadcaster.sendTransform(tf_msg);
 
     // pub odom
     nav_msgs::Odometry odom_msg;
@@ -301,25 +298,25 @@ void loop()
     odom_pub.publish(&odom_msg);
 
     // for PID tunning
-    Serial.print("ERROR: ");
-    Serial.print(error_R);
-    Serial.print('\t');
-    Serial.print("PWM_FACTOR: ");
-    Serial.print(pwm_R_factor);
-    Serial.print('\t');
-    Serial.print("Desired PWM: ");
-    Serial.print(pwm_R_desired);
-    Serial.print('\t');
-    Serial.print(" ADJUSTED PWM: ");
-    Serial.print(pwm_R_input);
-    Serial.print('\t');
-    Serial.print("DESIRED SPEED: ");
-    Serial.print(rpm_R_desired);
-    Serial.println(" RPM");
-    Serial.print('\t');
-    Serial.print("ACTUAL SPEED: ");
-    Serial.print(rpm_R_measured);
-    Serial.println(" RPM");
+    // Serial.print("ERROR: ");
+    // Serial.print(error_R);
+    // Serial.print('\t');
+    // Serial.print("PWM_FACTOR: ");
+    // Serial.print(pwm_R_factor);
+    // Serial.print('\t');
+    // Serial.print("Desired PWM: ");
+    // Serial.print(pwm_R_desired);
+    // Serial.print('\t');
+    // Serial.print(" ADJUSTED PWM: ");
+    // Serial.print(pwm_R_input);
+    // Serial.print('\t');
+    // Serial.print("DESIRED SPEED: ");
+    // Serial.print(rpm_R_desired);
+    // Serial.println(" RPM");
+    // Serial.print('\t');
+    // Serial.print("ACTUAL SPEED: ");
+    // Serial.print(rpm_R_measured);
+    // Serial.println(" RPM");
 
     // reset encoder
     ENCO_R_count = 0;
