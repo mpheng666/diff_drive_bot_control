@@ -19,7 +19,7 @@
 #define motor_max_rpm 105.0
 
 ros::NodeHandle nh;
-geometry_msgs::TransformStamped t;
+geometry_msgs::TransformStamped tf_msg;
 nav_msgs::Odometry odom_msg;
 std_msgs::Float64MultiArray feedback_msg;
 ros::Publisher odom_pub("/odom", &odom_msg);
